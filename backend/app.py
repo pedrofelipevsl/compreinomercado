@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import requests
 from models import Item, Loja, NotaFiscal
 import json
+from datetime import datetime
+import re
 
 app = Flask(__name__)
 
@@ -16,14 +18,34 @@ def itens_da_nota(chave_acesso):
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
     table = soup.find('table', {'id': 'tabResult'})
+    header = soup.find('div', {'class': 'txtCenter'})
+
+    #LOJA
+    #nome_da_loja 
+    nome_da_loja_element = header.find('div', {'class': 'txtTopo'}) 
+    nome_da_loja_content = nome_da_loja_element.text
+    nome_da_loja = nome_da_loja_content
+    #cnpj
+    cnpj_element = header.find_all('div', {'class': 'text'})[0]
+    cnpj_content = cnpj_element.text.replace("\r", "").replace("\n", "").replace("\t", "").replace("CNPJ:", "").replace(".", "").replace("/", "").replace("-", "").replace(" ", "")
+    cnpj = cnpj_content
+    # #endereco
+    endereco_element = header.find_all('div', {'class': 'text'})[1]
+    endereco_content = endereco_element.text.replace('\r', '').replace('\n', '').replace('\t', '').strip()
+    endereco = endereco_content
+
+    loja = Loja(nome_da_loja, cnpj, endereco, nota_fiscal=[123])
+
+    #NOTA FISCAL
+    nf = NotaFiscal("001", datetime.now(), 100.0, loja)
     
-    #scraping dos itens
+    #ITENS
     # nome_do_produto
     txtTit_elements = table.find_all('span', {'class': 'txtTit'}) 
     txtTit_content = [element.get_text() for element in txtTit_elements]
     # codigo_do_item_na_loja
     RCod_elements = table.find_all('span', {'class': 'RCod'}) 
-    RCod_content = [element.get_text().split(":")[-1] for element in RCod_elements]
+    RCod_content = [element.get_text().split(":")[-1].strip()[:-1] for element in RCod_elements]
     # quantidade
     Rqtd_elements = table.find_all('span', {'class': 'Rqtd'}) 
     Rqtd_content = [element.get_text().split(".:")[-1] for element in Rqtd_elements]
@@ -48,10 +70,22 @@ def itens_da_nota(chave_acesso):
         item = Item(nome_do_produto, codigo_do_item_na_loja, quantidade, unidade_de_medida, valor_unitario, valor_total, nota_fiscal_id=123)
         itens_da_nota.append(item)
 
-    # Transforma a lista de itens em um dicionário para serializar para JSON
-    items_dict = {}
-    for i, item in enumerate(itens_da_nota):
-        items_dict[i] = {
+    # Transforma a nota fiscal em um dicionário para serializar para JSON
+    nota_fiscal_dict = {}
+    
+    nota_fiscal_dict = {
+    "nota_fiscal":{
+        "numero": nf.numero,
+        "data_emissao": nf.data_emissao,
+        "valor_total": nf.valor_total
+    },
+    "loja": {
+        "nome_da_loja": loja.nome_da_loja,
+        "cnpj": loja.cnpj,
+        "endereco": loja.endereco
+    },
+    "itens": {
+        i+1: {
             "nome_do_produto": item.nome_do_produto,
             "codigo_do_item_na_loja": item.codigo_do_item_na_loja,
             "quantidade": item.quantidade,
@@ -59,9 +93,11 @@ def itens_da_nota(chave_acesso):
             "valor_unitario": item.valor_unitario,
             "valor_total": item.valor_total,
             "nota_fiscal_id": item.nota_fiscal_id
-            }
-
-    return jsonify(items_dict)
+        } for i, item in enumerate(itens_da_nota)
+    }
+}
+    
+    return jsonify(nota_fiscal_dict)
 
 if __name__ == '__main__':
     app.run(debug=True)

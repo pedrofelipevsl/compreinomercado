@@ -2,15 +2,15 @@ from datetime import datetime
 from typing import List, Optional
 
 class Loja:
-    def __init__(self, nome: str, cnpj: str, endereco: str, nota_fiscal: List['NotaFiscal'] = None):
-        self.nome = nome
+    def __init__(self, nome_da_loja: str, cnpj: str, endereco: str, nota_fiscal: List['NotaFiscal'] = None):
+        self.nome_da_loja = nome_da_loja
         self.cnpj = cnpj
         self.endereco = endereco
         self.nota_fiscal = nota_fiscal or []
 
     def to_dict(self):
         return {
-            "nome": self.nome,
+            "nome_da_loja": self.nome_da_loja,
             "cnpj": self.cnpj,
             "endereco": self.endereco,
             "nota_fiscal": [nf.to_dict() for nf in self.nota_fiscal],
@@ -28,7 +28,6 @@ class Item:
 
     def to_dict(self):
         return {
-            "id": self.id,
             "nome_do_produto": self.nome_do_produto,
             "codigo_do_item_na_loja": self.codigo_do_item_na_loja,
             "quantidade": self.quantidade,
