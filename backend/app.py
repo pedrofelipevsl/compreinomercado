@@ -5,6 +5,7 @@ from models import Item, Loja, NotaFiscal
 import json
 from datetime import datetime
 import re
+from lxml import html
 
 app = Flask(__name__)
 
@@ -19,6 +20,8 @@ def itens_da_nota(chave_acesso):
     soup = BeautifulSoup(response.content, 'html.parser')
     table = soup.find('table', {'id': 'tabResult'})
     header = soup.find('div', {'class': 'txtCenter'})
+    info = soup.find('div', {'id': 'infos'})
+    tree = html.fromstring(response.content)
 
     #LOJA
     #nome_da_loja 
@@ -37,7 +40,24 @@ def itens_da_nota(chave_acesso):
     loja = Loja(nome_da_loja, cnpj, endereco, nota_fiscal=[123])
 
     #NOTA FISCAL
-    nf = NotaFiscal("001", datetime.now(), 100.0, loja)
+    #chave de acesso
+    chave_de_acesso_element = info.find('span', {'class': 'chave'})
+    chave_de_acesso_content = chave_de_acesso_element.text.replace(" ", "")
+    numero = chave_de_acesso_content
+
+    #data de emissão
+    emissao_element = soup.find("strong", text=re.compile("Emissão:"))
+    data_emissao = re.search(r"\d{2}/\d{2}/\d{4}", emissao_element.next_sibling.strip()).group()
+
+    print(data_emissao)
+
+
+    #valor total
+    valor_total_element = tree.xpath('//*[@id="linhaTotal"][2]/span')
+    valor_total_content = valor_total_element[0].text
+    valor_total = valor_total_content
+
+    nf = NotaFiscal(numero, data_emissao, valor_total, loja)
     
     #ITENS
     # nome_do_produto
@@ -75,7 +95,7 @@ def itens_da_nota(chave_acesso):
     
     nota_fiscal_dict = {
     "nota_fiscal":{
-        "numero": nf.numero,
+        "chave_de_acesso": nf.numero,
         "data_emissao": nf.data_emissao,
         "valor_total": nf.valor_total
     },
@@ -91,8 +111,7 @@ def itens_da_nota(chave_acesso):
             "quantidade": item.quantidade,
             "unidade_de_medida": item.unidade_de_medida,
             "valor_unitario": item.valor_unitario,
-            "valor_total": item.valor_total,
-            "nota_fiscal_id": item.nota_fiscal_id
+            "valor_total": item.valor_total
         } for i, item in enumerate(itens_da_nota)
     }
 }
