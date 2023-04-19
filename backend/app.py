@@ -119,4 +119,4 @@ def itens_da_nota(chave_acesso):
     return jsonify(nota_fiscal_dict)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
