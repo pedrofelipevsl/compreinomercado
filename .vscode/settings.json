@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/03b3ee31-d111-49bb-8099-a464fa1a4be2/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/compreinomercado",
+    "appService.deploySubpath": "backend"
+}
