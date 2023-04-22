@@ -1,5 +1,5 @@
-Flask==2.2.3
-beautifulsoup4==4.10.0
-requests==2.26.0
-lxml==4.6.3
-typing==3.10.0.2
+Flask
+beautifulsoup4
+requests
+lxml
+typing
