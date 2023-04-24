@@ -49,9 +49,6 @@ def itens_da_nota(chave_acesso):
     emissao_element = soup.find("strong", text=re.compile("Emissão:"))
     data_emissao = re.search(r"\d{2}/\d{2}/\d{4}", emissao_element.next_sibling.strip()).group()
 
-    print(data_emissao)
-
-
     #valor total
     valor_total_element = tree.xpath('//*[@id="linhaTotal"][2]/span')
     valor_total_content = valor_total_element[0].text
