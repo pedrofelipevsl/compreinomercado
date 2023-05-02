@@ -89,30 +89,33 @@ def itens_da_nota(chave_acesso):
 
     # Transforma a nota fiscal em um dicionário para serializar para JSON
     nota_fiscal_dict = {}
-    
-    nota_fiscal_dict = {
-    "nota_fiscal":{
-        "chave_de_acesso": nf.numero,
-        "data_emissao": nf.data_emissao,
-        "valor_total": nf.valor_total
-    },
-    "loja": {
-        "nome_da_loja": loja.nome_da_loja,
-        "cnpj": loja.cnpj,
-        "endereco": loja.endereco
-    },
-    "itens": {
-        i+1: {
+    itens_list = []
+
+    for i, item in enumerate(itens_da_nota):
+        item_dict = {
             "nome_do_produto": item.nome_do_produto,
             "codigo_do_item_na_loja": item.codigo_do_item_na_loja,
             "quantidade": item.quantidade,
             "unidade_de_medida": item.unidade_de_medida,
             "valor_unitario": item.valor_unitario,
             "valor_total": item.valor_total
-        } for i, item in enumerate(itens_da_nota)
+        }
+        itens_list.append(item_dict)
+
+    nota_fiscal_dict = {
+        "nota_fiscal":{
+            "chave_de_acesso": nf.numero,
+            "data_emissao": nf.data_emissao,
+            "valor_total": nf.valor_total
+        },
+        "loja": {
+            "nome_da_loja": loja.nome_da_loja,
+            "cnpj": loja.cnpj,
+            "endereco": loja.endereco
+        },
+        "itens": itens_list
     }
-}
-    
+
     return jsonify(nota_fiscal_dict)
 
 if __name__ == '__main__':
