@@ -35,6 +35,7 @@ def itens_da_nota(chave_acesso):
     # #endereco
     endereco_element = header.find_all('div', {'class': 'text'})[1]
     endereco_content = endereco_element.text.replace('\r', '').replace('\n', '').replace('\t', '').strip()
+    endereco_content = endereco_content.replace(',,', ', ').replace(',', ', ')
     endereco = endereco_content
 
     loja = Loja(nome_da_loja, cnpj, endereco, nota_fiscal=[123])
@@ -48,10 +49,12 @@ def itens_da_nota(chave_acesso):
     #data de emissão
     emissao_element = soup.find("strong", text=re.compile("Emissão:"))
     data_emissao = re.search(r"\d{2}/\d{2}/\d{4}", emissao_element.next_sibling.strip()).group()
+    data_emissao = data_emissao.replace("/", "-")
+    data_emissao = datetime.strptime(data_emissao, "%d-%m-%Y").strftime("%m-%d-%Y")
 
     #valor total
     valor_total_element = tree.xpath('//*[@id="linhaTotal"][2]/span')
-    valor_total_content = valor_total_element[0].text
+    valor_total_content = valor_total_element[0].text.replace(",", ".")
     valor_total = valor_total_content
 
     nf = NotaFiscal(numero, data_emissao, valor_total, loja)
@@ -65,16 +68,16 @@ def itens_da_nota(chave_acesso):
     RCod_content = [element.get_text().split(":")[-1].strip()[:-1] for element in RCod_elements]
     # quantidade
     Rqtd_elements = table.find_all('span', {'class': 'Rqtd'}) 
-    Rqtd_content = [element.get_text().split(".:")[-1] for element in Rqtd_elements]
+    Rqtd_content = [element.get_text().split(".:")[-1].replace(",", ".") for element in Rqtd_elements]
     # unidade_de_medida
     RUN_elements = table.find_all('span', {'class': 'RUN'}) 
     RUN_content = [element.get_text().split(":")[-1] for element in RUN_elements]
     # valor_unitario
     RvlUnit_elements = table.find_all('span', {'class': 'RvlUnit'}) 
-    RvlUnit_content = [element.get_text().split(".:")[-1] for element in RvlUnit_elements]
+    RvlUnit_content = [element.get_text().split(".:")[-1].replace(",", ".") for element in RvlUnit_elements]
     # valor_total
     valor_elements = table.find_all('span', {'class': 'valor'}) 
-    valor_content = [element.get_text() for element in valor_elements]
+    valor_content = [element.get_text().replace(",", ".") for element in valor_elements]
     
     itens_da_nota = []
     for i in range(len(txtTit_content)):
