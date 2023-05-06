@@ -101,7 +101,8 @@ def itens_da_nota(chave_acesso):
             "quantidade": item.quantidade,
             "unidade_de_medida": item.unidade_de_medida,
             "valor_unitario": item.valor_unitario,
-            "valor_total": item.valor_total
+            "valor_total": item.valor_total,
+            "nota_fiscal_chave_de_acesso": nf.numero,
         }
         itens_list.append(item_dict)
 
