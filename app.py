@@ -47,10 +47,20 @@ def itens_da_nota(chave_acesso):
     numero = chave_de_acesso_content
 
     #data de emissão
-    emissao_element = soup.find("strong", text=re.compile("Emissão:"))
-    data_emissao = re.search(r"\d{2}/\d{2}/\d{4}", emissao_element.next_sibling.strip()).group()
-    data_emissao = data_emissao.replace("/", "-")
-    data_emissao = datetime.strptime(data_emissao, "%d-%m-%Y").strftime("%m-%d-%Y")
+    # emissao_element = soup.find("strong", text=re.compile(" Emissão: "))
+    # data_emissao = re.search(r"\d{2}/\d{2}/\d{4}", emissao_element.next_sibling.strip()).group()
+    # data_emissao = data_emissao.replace("/", "-")
+    # data_emissao = datetime.strptime(data_emissao, "%d-%m-%Y").strftime("%m-%d-%Y")
+
+    #data de emissão 2
+    padrao = r"(\d{2}/\d{2}/\d{4})"
+    match = re.search(padrao, info.text)
+    if match:
+        data_emissao = match.group(1)
+        print(data_emissao)
+    else:
+        print("Data de emissão não encontrada.")
+
 
     #valor total
     valor_total_element = tree.xpath('//*[@id="linhaTotal"][2]/span')
