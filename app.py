@@ -57,6 +57,7 @@ def itens_da_nota(chave_acesso):
     match = re.search(padrao, info.text)
     if match:
         data_emissao = match.group(1)
+        data_emissao = datetime.strptime(data_emissao, "%d/%m/%Y").strftime("%m-%d-%Y")
         print(data_emissao)
     else:
         print("Data de emissão não encontrada.")
